@@ -32,3 +32,10 @@ class TrafficTests(unittest.TestCase):
     def test_udp_requires_rate_and_adds_udp_arguments(self):
         with self.assertRaises(ValueError):
             run_iperf("udp", "10.0.0.2", 3, Path(tempfile.gettempdir()))
+
+    def test_udp_records_offered_rate_in_command(self):
+        server = FakeServer()
+        result = type("Result", (), {"stdout": json.dumps({"end": {}}), "stderr": ""})()
+        with tempfile.TemporaryDirectory() as directory, patch("netlab.traffic.subprocess.Popen", return_value=server), patch("netlab.traffic.subprocess.run", return_value=result) as run:
+            run_iperf("udp", "10.0.0.2", 3, Path(directory), udp_offered_rate_mbps=25)
+        self.assertEqual(run.call_args.args[0][-3:], ["-u", "-b", "25M"])
