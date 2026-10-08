@@ -45,7 +45,7 @@ def setup(topology: Topology = Topology()) -> None:
         _run(ip("link", "set", "veth-server", "up", namespace=topology.server))
     except (subprocess.CalledProcessError, TopologyError) as exc:
         if created:
-            clean(topology)
+            _clean_names(created)
         if isinstance(exc, TopologyError):
             raise
         raise TopologyError(str(exc)) from exc
@@ -58,5 +58,9 @@ def status(topology: Topology = Topology()) -> bool:
 
 
 def clean(topology: Topology = Topology()) -> None:
-    for namespace in (topology.client, topology.server):
+    _clean_names((topology.client, topology.server))
+
+
+def _clean_names(names: tuple[str, ...] | list[str]) -> None:
+    for namespace in names:
         _run(ip("netns", "del", namespace), check=False)
