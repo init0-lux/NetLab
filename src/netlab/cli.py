@@ -1,5 +1,7 @@
 import argparse
 
+from . import topology
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="netlab")
@@ -9,7 +11,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
-    build_parser().parse_args()
+    args = build_parser().parse_args()
+    if args.command == "setup":
+        topology.setup()
+    elif args.command == "status":
+        print("ready" if topology.status() else "absent")
+    elif args.command == "clean":
+        topology.clean()
     return 0
 
 
